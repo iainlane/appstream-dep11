@@ -17,7 +17,7 @@
 
 import os
 import gzip
-import bz2
+import lzma
 import logging as log
 from .debfile import DebFile
 from apt_pkg import TagFile, parse_depends, version_compare
@@ -103,10 +103,10 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
 
     pkgl10n = dict()
     if with_description:
-        l10n_en_source_path = archive_root + "/dists/%s/%s/i18n/Translation-en.bz2" % (suite, component)
+        l10n_en_source_path = archive_root + "/dists/%s/%s/i18n/Translation-en.xz" % (suite, component)
         if os.path.exists(l10n_en_source_path):
             try:
-                l10n_file = bz2.open(l10n_en_source_path, mode='rb')
+                l10n_file = lzma.open(l10n_en_source_path, mode='rb')
                 l10ntagf = TagFile(l10n_file)
                 for section in l10ntagf:
                     pkgname = section.get('Package')
