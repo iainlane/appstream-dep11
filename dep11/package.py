@@ -18,6 +18,7 @@
 import os
 import gzip
 import lzma
+import tempfile
 import logging as log
 from .debfile import DebFile
 from apt_pkg import TagFile, parse_depends, version_compare
@@ -107,14 +108,16 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
         if os.path.exists(l10n_en_source_path):
             try:
                 l10n_file = lzma.open(l10n_en_source_path, mode='rb')
-                l10ntagf = TagFile(l10n_file)
-                for section in l10ntagf:
-                    pkgname = section.get('Package')
-                    if not pkgname:
-                        continue
-                    pkgl10n[pkgname] = dict()
-                    pkgl10n[pkgname]['C'] = section.get('Description-en')
-                l10n_file.close()
+                with tempfile.TemporaryFile(mode='w+b') as tf:
+                    with lzma.open(l10n_file, 'rb') as f:
+                        tf.write(f.read())
+                    tf.seek(0)
+                    for section in apt_pkg.TagFile(tf):
+                        pkgname = section.get('Package')
+                        if not pkgname:
+                            continue
+                        pkgl10n[pkgname] = dict()
+                        pkgl10n[pkgname]['C'] = section.get('Description-en')
             except Exception as e:
                 log.warning("Could not use i18n file '{}': {}".format(l10n_en_source_path, str(e)))
 
