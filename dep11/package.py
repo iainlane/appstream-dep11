@@ -107,12 +107,11 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
         l10n_en_source_path = archive_root + "/dists/%s/%s/i18n/Translation-en.xz" % (suite, component)
         if os.path.exists(l10n_en_source_path):
             try:
-                l10n_file = lzma.open(l10n_en_source_path, mode='rb')
                 with tempfile.TemporaryFile(mode='w+b') as tf:
-                    with lzma.open(l10n_file, 'rb') as f:
+                    with lzma.open(l10n_en_source_path, 'rb') as f:
                         tf.write(f.read())
                     tf.seek(0)
-                    for section in apt_pkg.TagFile(tf):
+                    for section in TagFile(tf):
                         pkgname = section.get('Package')
                         if not pkgname:
                             continue
