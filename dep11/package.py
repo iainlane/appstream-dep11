@@ -88,9 +88,12 @@ class Package:
             for line in desc_lines:
                 line = line.strip()
                 if line == '.':
+                    desc_as = desc_as.strip()
                     desc_as += '</p><p>'
                     continue
                 desc_as += escape(line)
+                desc_as += " "
+            desc_as = desc_as.strip()
             desc_as += '</p>'
             self._description[locale] = desc_as
 
@@ -116,7 +119,7 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
                         if not pkgname:
                             continue
                         pkgl10n[pkgname] = dict()
-                        pkgl10n[pkgname]['C'] = section.get('Description-en')
+                        pkgl10n[pkgname]['C'] = "\n".join(section.get('Description-en').splitlines()[1:])
             except Exception as e:
                 log.warning("Could not use i18n file '{}': {}".format(l10n_en_source_path, str(e)))
 
