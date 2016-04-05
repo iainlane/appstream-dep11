@@ -107,11 +107,14 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
 
     pkgl10n = dict()
     if with_description:
-        l10n_en_source_path = archive_root + "/dists/%s/%s/i18n/Translation-en.xz" % (suite, component)
-        if os.path.exists(l10n_en_source_path):
+        l10n_glob = os.path.join('archive_root', 'dists', suite, component, 'i18n', 'Translation-*.xz')
+        for path in glob.glob(l10n_glob):
+            # Translation-de_DE.xz -> ['Translation', 'de_DE', 'xz']
+            lang = os.path.basename(path).split('.-')[1]
+            log.info("Retrieving translations for the '%s' language from '%s'" % (lang, path))
             try:
                 with tempfile.TemporaryFile(mode='w+b') as tf:
-                    with lzma.open(l10n_en_source_path, 'rb') as f:
+                    with lzma.open(path, 'rb') as f:
                         tf.write(f.read())
                     tf.seek(0)
                     for section in TagFile(tf):
@@ -119,7 +122,9 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
                         if not pkgname:
                             continue
                         pkgl10n[pkgname] = dict()
-                        pkgl10n[pkgname]['C'] = "\n".join(section.get('Description-en').splitlines()[1:])
+                        pkgl10n[pkgname][lang] = "\n".join(section.get('Description-%s' % lang).splitlines()[1:])
+                        if lang == 'en': # en supplies C too
+                            pkgl10n[pkgname]['C'] = pkgl10n[pkgname][lang]
             except Exception as e:
                 log.warning("Could not use i18n file '{}': {}".format(l10n_en_source_path, str(e)))
 
