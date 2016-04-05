@@ -16,6 +16,7 @@
 # License along with this program.
 
 import os
+import glob
 import gzip
 import lzma
 import tempfile
