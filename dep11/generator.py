@@ -85,10 +85,14 @@ class DEP11Generator:
         if conf.get("ExportDir"):
             self._export_dir = conf.get("ExportDir")
 
+        self._langpack_dir = os.path.join(dep11_dir, "langpacks")
+
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
         if not os.path.exists(self._export_dir):
             os.makedirs(self._export_dir)
+        if not os.path.exists(self._langpack_dir):
+            os.makedirs(self._langpack_dir)
 
         self._suites_data = conf['Suites']
 
@@ -192,7 +196,7 @@ class DEP11Generator:
                     self._all_pkgs[base_suite_name][component][arch] = \
                         self._get_packages_for(base_suite_name, component, arch)
 
-        langpacks = UbuntuLangpackHandler(suite, suite_name, self._all_pkgs)
+        langpacks = UbuntuLangpackHandler(suite, suite_name, self._all_pkgs, self._langpack_dir, self._cache)
 
         for component in suite['components']:
             all_cpt_pkgs = list()
@@ -333,8 +337,6 @@ class DEP11Generator:
             self.make_icon_tar(suite_name, component, all_cpt_pkgs)
 
             log.info("Completed metadata extraction for suite %s/%s" % (suite_name, component))
-
-        langpacks.cleanup()
 
 
     def expire_cache(self):

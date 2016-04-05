@@ -50,13 +50,14 @@ class DataCache:
 
 
     def open(self, cachedir):
-        self._dbenv = lmdb.open(cachedir, max_dbs=5, map_size=self._map_size, metasync=False)
+        self._dbenv = lmdb.open(cachedir, max_dbs=6, map_size=self._map_size, metasync=False)
 
         self._pkgdb = self._dbenv.open_db(b'packages')
         self._hintsdb = self._dbenv.open_db(b'hints')
         self._datadb = self._dbenv.open_db(b'metadata')
         self._statsdb = self._dbenv.open_db(b'statistics')
         self._suitesdb = self._dbenv.open_db(b'suites')
+        self._langpacksdb = self._dbenv.open_db(b'langpacks')
 
         self._opened = True
         self.cache_dir = cachedir
@@ -74,6 +75,7 @@ class DataCache:
         self._dbenv = None
         self._statsdb = None
         self._suitesdb = None
+        self._langpacksdb = None
         self._opened = False
 
 
@@ -422,3 +424,15 @@ class DataCache:
                 if pkid_str.startswith(pkgname+'/'):
                      pkkey = pkid_str.split("/", 1)[1]
                      yield pkkey, data.split("\n")
+
+    def update_langpack(self, langpack, version):
+        langpack = tobytes(langpack)
+        version = tobytes(version)
+        with self._dbenv.begin(db=self._langpacksdb, write=True) as txn:
+            old_version = txn.get(langpack)
+            txn.put(langpack, version)
+
+            if not old_version or version != old_version:
+                return False
+
+            return True

@@ -24,27 +24,31 @@ import glob
 import logging as log
 import os
 import shutil
-import tempfile
+from dep11 import DataCache
 
 class UbuntuLangpackHandler:
     '''
     Open all language-pack-* packages, in which Ubuntu places detached
     translations for .desktop files for certain applications.
     '''
-    def __init__(self, suite, suite_name, all_pkgs):
+    def __init__(self, suite, suite_name, all_pkgs, directory, cache):
         self._packages = list()
         self._translation_files = dict()
+
+        self._cache = cache
 
         base_suite_name = suite.get('baseSuite')
 
         suites = [all_pkgs[suite_name]] + ([all_pkgs[base_suite_name]] if base_suite_name else [])
 
-        self._dir = tempfile.mkdtemp()
+        self._dir = directory
 
         log.info('Extracting langpacks')
         for pkg in self._find_all_langpacks(suites):
-            pkg.debfile.extract(self._dir)
-            pkg.close()
+            if not cache.update_langpack(pkg.name, pkg.version):
+                log.info('Extracting %s' % pkg.name)
+                pkg.debfile.extract(self._dir)
+                pkg.close()
         log.info('Finished extracting langpacks')
 
     def cleanup(self):
@@ -64,14 +68,14 @@ class UbuntuLangpackHandler:
         return langpacks
 
     def get(self, domain, text):
-        path = self._dir + '/usr/share/locale-langpack/'
+        path = os.path.join(self._dir, 'usr', 'share', 'locale-langpack')
         if domain not in self._translation_files:
             self._translation_files[domain] = gettext.find(domain, localedir=path,
                     languages=[os.path.basename(x) for x in glob.glob(path + '/*')],
                     all=True)
         for mo in self._translation_files[domain]:
             # .../usr/share/locale-langpack/en_AU/LC_MESSAGES/eog.mo -> en_AU
-            locale = os.path.split(mo)[0].split('/')[-2]
+            locale = os.path.split(mo)[0].split(os.sep)[-2]
             with open(mo, 'rb') as fp:
                 try:
                     translation = GNUTranslations(fp).gettext(text)
@@ -81,4 +85,3 @@ class UbuntuLangpackHandler:
                     yield (locale, translation)
                 except ValueError as e:
                     log.warning("Couldn't get translations from '%s': '%s'" % (mo, str(e)))
-
