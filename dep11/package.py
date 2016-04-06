@@ -19,6 +19,7 @@ import os
 import glob
 import gzip
 import lzma
+import re
 import tempfile
 import logging as log
 from .debfile import DebFile
@@ -111,7 +112,7 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
         l10n_glob = os.path.join(archive_root, 'dists', suite, component, 'i18n', 'Translation-*.xz')
         for path in glob.glob(l10n_glob):
             # Translation-de_DE.xz -> ['Translation', 'de_DE', 'xz']
-            lang = os.path.basename(path).split('.-')[1]
+            lang = re.findall(r"[^-\.]+", os.path.basename(path))[1]
             log.info("Retrieving translations for the '%s' language from '%s'" % (lang, path))
             try:
                 with tempfile.TemporaryFile(mode='w+b') as tf:
