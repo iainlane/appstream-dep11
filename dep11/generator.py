@@ -146,7 +146,7 @@ class DEP11Generator:
 
             for gid in gids:
                 for size in self._icon_sizes:
-                    icon_location_glob = os.path.join (dep11_mediadir, component, gid, "icons", size, "*.png")
+                    icon_location_glob = os.path.join (dep11_mediadir, "*", gid, "icons", size, "*.png")
 
                     tar = None
                     if size not in size_tars:
