@@ -24,6 +24,7 @@ import tempfile
 import logging as log
 from .debfile import DebFile
 from apt_pkg import TagFile, parse_depends, version_compare
+from collections import defaultdict
 from xml.sax.saxutils import escape
 
 
@@ -107,7 +108,7 @@ class Package:
 def read_packages_dict_from_file(archive_root, suite, component, arch, with_description=False):
     source_path = archive_root + "/dists/%s/%s/binary-%s/Packages.gz" % (suite, component, arch)
 
-    pkgl10n = dict()
+    pkgl10n = defaultdict(dict)
     if with_description:
         l10n_glob = os.path.join(archive_root, 'dists', suite, component, 'i18n', 'Translation-*.xz')
         for path in glob.glob(l10n_glob):
@@ -123,7 +124,6 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
                         pkgname = section.get('Package')
                         if not pkgname:
                             continue
-                        pkgl10n[pkgname] = dict()
                         pkgl10n[pkgname][lang] = "\n".join(section.get('Description-%s' % lang).splitlines()[1:])
                         if lang == 'en': # en supplies C too
                             pkgl10n[pkgname]['C'] = pkgl10n[pkgname][lang]
