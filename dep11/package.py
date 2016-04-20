@@ -22,6 +22,7 @@ import tempfile
 import logging as log
 from .debfile import DebFile
 from apt_pkg import TagFile, parse_depends, version_compare
+from collections import defaultdict
 from xml.sax.saxutils import escape
 
 
@@ -102,7 +103,7 @@ class Package:
 def read_packages_dict_from_file(archive_root, suite, component, arch, with_description=False):
     source_path = archive_root + "/dists/%s/%s/binary-%s/Packages.gz" % (suite, component, arch)
 
-    pkgl10n = dict()
+    pkgl10n = defaultdict(dict)
     if with_description:
         l10n_en_source_path = archive_root + "/dists/%s/%s/i18n/Translation-en.xz" % (suite, component)
         if os.path.exists(l10n_en_source_path):
@@ -115,7 +116,6 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
                         pkgname = section.get('Package')
                         if not pkgname:
                             continue
-                        pkgl10n[pkgname] = dict()
                         pkgl10n[pkgname]['C'] = section.get('Description-en')
             except Exception as e:
                 log.warning("Could not use i18n file '{}': {}".format(l10n_en_source_path, str(e)))
