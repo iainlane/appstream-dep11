@@ -160,8 +160,9 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
             pass
 
         if with_description:
-            if pkgl10n.get(pkg.name):
-                pkg.set_description('C', pkgl10n[pkg.name].get('C'))
+            if pkg.name in pkgl10n:
+                for lang in pkgl10n[pkg.name]:
+                    pkg.set_description(lang, pkgl10n[pkg.name][lang])
             else:
                 pkg.set_description('C', section.get('Description'))
 
