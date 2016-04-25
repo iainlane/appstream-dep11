@@ -306,7 +306,7 @@ class DEP11Generator:
                 if not os.path.exists(dep11_dir):
                     os.makedirs(dep11_dir)
 
-                if not new_components:
+                if not new_components and os.path.exists(data_fname):
                     log.info("Skipping %s, no components in any of the new packages.", suite_component_arch)
                 else:
                     # now write data to disk
