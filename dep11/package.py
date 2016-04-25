@@ -111,7 +111,7 @@ def read_packages_dict_from_file(archive_root, suite, component, arch, with_desc
     pkgl10n = defaultdict(dict)
     if with_description:
         l10n_glob = os.path.join(archive_root, 'dists', suite, component, 'i18n', 'Translation-*.xz')
-        for path in glob.glob(l10n_glob):
+        for path in set(glob.glob(l10n_glob)):
             # Translation-de_DE.xz -> ['Translation', 'de_DE', 'xz']
             lang = re.findall(r"[^-\.]+", os.path.basename(path))[1]
             log.info("Retrieving translations for the '%s' language from '%s'" % (lang, path))
