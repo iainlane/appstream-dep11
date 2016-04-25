@@ -246,7 +246,7 @@ class DEP11Generator:
                 if not pkgs_todo and not new_components:
                     if not os.path.exists(data_fname):
                         log.info ("No packages to process for %s, but %s doesn't exist, so writing with header only." % (suite_component_arch, data_fname))
-                        data_f = gzip.open(data_fname+, 'wb')
+                        data_f = gzip.open(data_fname, 'wb')
                         data_f.write(bytes(dep11_header, 'utf-8'))
                         data_f.close()
                     else:
