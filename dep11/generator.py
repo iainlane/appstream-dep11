@@ -238,8 +238,19 @@ class DEP11Generator:
                         self._cache.remove_package_from_suite(pkid, suite_component_arch)
                     new_components = True
 
+                dep11_header = get_dep11_header(self._repo_name, suite_name, component, os.path.join(self._dep11_url, component), suite.get('dataPriority', 0))
+
+                if not os.path.exists(dep11_dir):
+                    os.makedirs(dep11_dir)
+
                 if not pkgs_todo and not new_components:
-                    log.info("Skipped %s, no new packages to process." % suite_component_arch)
+                    if not os.path.exists(data_fname):
+                        log.info ("No packages to process for %s, but %s doesn't exist, so writing with header only." % (suite_component_arch, data_fname))
+                        data_f = gzip.open(data_fname+, 'wb')
+                        data_f.write(bytes(dep11_header, 'utf-8'))
+                        data_f.close()
+                    else:
+                        log.info("Skipped %s, no new packages to process." % suite_component_arch)
                     continue
 
                 if pkgs_todo:
@@ -300,11 +311,6 @@ class DEP11Generator:
                     os.makedirs(hints_dir)
                 hints_fname = os.path.join(hints_dir, "DEP11Hints_%s.yml.gz" % (arch))
                 hints_f = gzip.open(hints_fname+".new", 'wb')
-
-                dep11_header = get_dep11_header(self._repo_name, suite_name, component, os.path.join(self._dep11_url, component), suite.get('dataPriority', 0))
-
-                if not os.path.exists(dep11_dir):
-                    os.makedirs(dep11_dir)
 
                 if not new_components and os.path.exists(data_fname):
                     log.info("Skipping %s, no components in any of the new packages.", suite_component_arch)
