@@ -235,6 +235,9 @@ def _parse_screenshots_tag(subs):
 
             # else look for captions and image tag
             for tags in usubs:
+                if tags.text is None:
+                    continue
+
                 if tags.tag == 'caption':
                     # for localisation
                     attr_dic = tags.attrib
