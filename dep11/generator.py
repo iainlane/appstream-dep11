@@ -196,7 +196,7 @@ class DEP11Generator:
                     self._all_pkgs[base_suite_name][component][arch] = \
                         self._get_packages_for(base_suite_name, component, arch)
 
-        langpacks = UbuntuLangpackHandler(suite, suite_name, self._all_pkgs, self._langpack_dir, self._cache)
+        langpacks = None
 
         for component in suite['components']:
             all_cpt_pkgs = list()
@@ -259,6 +259,8 @@ class DEP11Generator:
                     iconh = IconHandler(suite_name, component, arch, self._archive_root,
                                                    icon_theme, base_suite_name=suite.get('baseSuite'))
                     iconh.set_wanted_icon_sizes(self._icon_sizes)
+                    if not langpacks:
+                        langpacks = UbuntuLangpackHandler(suite, suite_name, self._all_pkgs, self._langpack_dir, self._cache)
                     mde = MetadataExtractor(suite_name,
                                     component,
                                     arch,
